@@ -57,8 +57,8 @@ def handler(event, context):
                     'headers': headers,
                     'body': json.dumps({
                         "ok": True,
-                        "project": os.getenv("GCP_PROJECT", "supparay-voice-rag"),
-                        "location": os.getenv("GCP_LOCATION", "us-central1"),
+                        "project": os.getenv("GOOGLE_CLOUD_PROJECT_ID", "supparay-voice-rag"),
+                        "location": os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
                         "status": "Netlify Function Active"
                     })
                 }
@@ -301,7 +301,7 @@ def get_chat_html():
         const env = document.getElementById('env');
         
         // Load environment info
-        fetch('/.netlify/functions/chat', {
+        fetch('/api/health', {
             method: 'GET',
             headers: { 'Accept': 'application/json' }
         }).then(r => r.json()).then(d => {

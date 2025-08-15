@@ -6,14 +6,15 @@ A Vertex AI-powered chatbot with Ray's unique personality, deployed on Netlify F
 
 ```
 supparay-clean/
-├── .netlify/
+├── netlify/
 │   └── functions/
-│       ├── chat.py          # Main Netlify Function handler
-│       ├── requirements.txt # Python dependencies
-│       └── runtime.txt      # Python runtime version
-├── data/                    # Data files (if needed)
-├── netlify.toml            # Netlify configuration
-└── README.md               # This file
+│       ├── chat.py                    # Main Netlify Function handler
+│       ├── vertex_ai_rag_system.py   # Vertex AI RAG system
+│       ├── requirements.txt           # Python dependencies
+│       └── runtime.txt                # Python runtime version
+├── data/                              # Data files (if needed)
+├── netlify.toml                       # Netlify configuration
+└── README.md                          # This file
 ```
 
 ## 🚀 Deployment
