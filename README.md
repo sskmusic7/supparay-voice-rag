@@ -60,6 +60,7 @@ netlify dev
 - **Modern UI**: Beautiful, responsive chat interface
 - **Error Handling**: Graceful fallbacks and debugging endpoints
 - **CORS Support**: Works from any domain
+- **Netlify Compliance**: Built-in safeguards for function limits and payload sizes
 
 ## 🐛 Troubleshooting
 
@@ -109,6 +110,21 @@ Check environment variable status and credentials.
 - Use environment variables for all sensitive data
 - The function creates temporary credential files that are immediately cleaned up
 - CORS is enabled for development (restrict in production if needed)
+
+## ⚠️ Netlify Function Limits
+
+**Important**: This function is designed to work within Netlify's function constraints:
+
+- **Execution Time**: 30 seconds maximum for synchronous functions
+- **Memory**: 1024 MB maximum
+- **Payload Size**: 6 MB maximum for requests and responses
+- **Python Support**: Community-supported (not officially documented by Netlify)
+
+The function includes built-in safeguards for these limits:
+- Payload size validation
+- Response truncation if too large
+- Execution time monitoring
+- Graceful fallbacks if limits are exceeded
 
 ## 📚 Dependencies
 

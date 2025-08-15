@@ -4,7 +4,13 @@ import tempfile
 import traceback
 
 def handler(event, context):
-    """Netlify function handler for chat requests"""
+    """Netlify function handler for chat requests
+    
+    Netlify Function Limits:
+    - 30 second execution limit for synchronous functions
+    - 6 MB request and response payload size limit
+    - 1024 MB memory limit
+    """
     
     # Handle CORS preflight
     if event['httpMethod'] == 'OPTIONS':
@@ -28,6 +34,15 @@ def handler(event, context):
     try:
         # Parse request body
         if event['httpMethod'] == 'POST':
+            # Check payload size (Netlify limit: 6MB)
+            body_size = len(event.get('body', ''))
+            if body_size > 6 * 1024 * 1024:  # 6MB in bytes
+                return {
+                    'statusCode': 413,
+                    'headers': headers,
+                    'body': json.dumps({"error": "Request payload too large (max 6MB)"})
+                }
+            
             body = json.loads(event.get('body', '{}'))
             message = body.get('message', '').strip()
             
@@ -41,10 +56,22 @@ def handler(event, context):
             # Initialize Vertex AI if not already done
             response = process_chat_message(message)
             
+            # Check response size (Netlify limit: 6MB)
+            response_json = json.dumps(response)
+            if len(response_json) > 6 * 1024 * 1024:  # 6MB in bytes
+                # Truncate response if too large
+                truncated_response = {
+                    "message": response.get("message", "")[:1000] + "... (truncated)",
+                    "retrieval": [],
+                    "status": "Response truncated due to size limits",
+                    "ai_powered": response.get("ai_powered", False)
+                }
+                response_json = json.dumps(truncated_response)
+            
             return {
                 'statusCode': 200,
                 'headers': headers,
-                'body': json.dumps(response)
+                'body': response_json
             }
         
         # Handle GET requests (health check)
@@ -156,13 +183,25 @@ def initialize_vertex_ai():
         return None
 
 def process_chat_message(message):
-    """Process chat message with Vertex AI or fallback"""
+    """Process chat message with Vertex AI or fallback
+    
+    Note: Netlify has a 30-second execution limit for synchronous functions
+    """
+    import time
+    start_time = time.time()
+    
     try:
         # Try Vertex AI first
         bot = initialize_vertex_ai()
         if bot:
             print(f"Processing with Vertex AI: {message}")
             result = bot.ask(message)
+            
+            # Check execution time
+            execution_time = time.time() - start_time
+            if execution_time > 25:  # Warn if approaching 30s limit
+                print(f"⚠️ Warning: Function execution time: {execution_time:.2f}s (approaching 30s limit)")
+            
             return {
                 "message": result["answer"],
                 "retrieval": result.get("citations", []),
@@ -173,6 +212,12 @@ def process_chat_message(message):
             # Use fallback
             print(f"Using fallback for: {message}")
             response = get_fallback_response(message)
+            
+            # Check execution time
+            execution_time = time.time() - start_time
+            if execution_time > 25:  # Warn if approaching 30s limit
+                print(f"⚠️ Warning: Function execution time: {execution_time:.2f}s (approaching 30s limit)")
+            
             return {
                 "message": response,
                 "retrieval": [],
