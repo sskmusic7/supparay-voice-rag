@@ -1,48 +1,120 @@
-# 🎤 Supparay Voice RAG Chatbot
+# Ray AI Chat - Netlify Functions
 
-A clean, focused AI-powered chatbot that clones Supparay's authentic unfiltered voice using Vertex AI RAG from video transcripts.
+A Vertex AI-powered chatbot with Ray's unique personality, deployed on Netlify Functions.
 
-## 🚀 What This Does
-
-- **AI Chatbot** with Supparay's authentic voice and personality
-- **Vertex AI RAG** system for grounded responses
-- **Web UI** for real-time chat
-- **Netlify deployment** with serverless functions
-
-## 📁 Project Structure
+## 🏗️ Project Structure
 
 ```
 supparay-clean/
-├── .netlify/functions/     # Netlify serverless functions
-│   ├── chat.py            # Main chatbot function
-│   ├── requirements.txt   # Python dependencies
-│   └── runtime.txt        # Python version
-├── data/                  # Your transcript data
-│   └── merged_documents.txt
-├── vertex_ai_rag_system.py # Core RAG system
-├── index.html             # Chat UI
-├── netlify.toml          # Netlify configuration
-├── requirements.txt       # Main dependencies
-└── README.md             # This file
+├── .netlify/
+│   └── functions/
+│       ├── chat.py          # Main Netlify Function handler
+│       ├── requirements.txt # Python dependencies
+│       └── runtime.txt      # Python runtime version
+├── data/                    # Data files (if needed)
+├── netlify.toml            # Netlify configuration
+└── README.md               # This file
 ```
 
-## 🔧 Setup
+## 🚀 Deployment
 
-1. **Deploy to Netlify** from this folder
-2. **Set environment variables** in Netlify dashboard:
-   - `GCP_PROJECT`: `supparay-voice-rag`
-   - `GCP_LOCATION`: `us-central1`
-   - `RAG_CORPUS`: `6917529027641081856`
-   - `RAG_MODEL`: `gemini-2.0-flash-exp`
-   - `GOOGLE_APPLICATION_CREDENTIALS_JSON`: (your service account JSON)
+### 1. Environment Variables
 
-## 🎯 Core Files
+Set these in your Netlify dashboard:
 
-- **`chat.py`**: Netlify function that handles chat requests
-- **`vertex_ai_rag_system.py`**: Vertex AI RAG integration
-- **`index.html`**: Modern chat interface
-- **`netlify.toml`**: Deployment configuration
+- `GOOGLE_APPLICATION_CREDENTIALS_JSON`: Full JSON content of your Google Cloud service account key
+- `GOOGLE_CLOUD_PROJECT_ID`: Your Google Cloud project ID
+- `GOOGLE_CLOUD_LOCATION`: Google Cloud region (default: us-central1)
 
-## 🚀 Deploy
+### 2. Deploy to Netlify
 
-Simply deploy this folder to Netlify - it's clean and focused! 
+```bash
+# Connect your repository to Netlify
+# Or use Netlify CLI:
+netlify deploy --prod
+```
+
+## 🔧 Local Development
+
+### Test the Function Locally
+
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Start local development server
+netlify dev
+```
+
+### Test Endpoints
+
+- **Main Chat**: `http://localhost:8888/.netlify/functions/chat`
+- **Test Credentials**: `http://localhost:8888/api/test`
+- **Health Check**: `http://localhost:8888/.netlify/functions/chat`
+
+## 🎯 Features
+
+- **Ray's Personality**: Authentic Detroit-style humor and responses
+- **Vertex AI Integration**: Powered by Google's Gemini model
+- **Modern UI**: Beautiful, responsive chat interface
+- **Error Handling**: Graceful fallbacks and debugging endpoints
+- **CORS Support**: Works from any domain
+
+## 🐛 Troubleshooting
+
+### Check Function Logs
+
+1. Go to Netlify Dashboard → Functions
+2. Click on `chat` function
+3. View function logs for errors
+
+### Test Credentials
+
+Visit `/api/test` endpoint to verify:
+- ✅ Credentials are loaded
+- ✅ Project ID is set
+- ✅ Location is configured
+
+### Common Issues
+
+- **Credentials Error**: Ensure `GOOGLE_APPLICATION_CREDENTIALS_JSON` contains the full JSON, not just a path
+- **Project ID Missing**: Verify `GOOGLE_CLOUD_PROJECT_ID` is set
+- **Function Timeout**: Check if Vertex AI initialization is taking too long
+
+## 📝 API Endpoints
+
+### POST `/.netlify/functions/chat`
+Send a chat message:
+
+```json
+{
+  "message": "What's good Ray?"
+}
+```
+
+Response:
+```json
+{
+  "response": "What's good my nigga! I'm just vibin' You good?"
+}
+```
+
+### GET `/api/test`
+Check environment variable status and credentials.
+
+## 🔒 Security Notes
+
+- Never commit credentials to your repository
+- Use environment variables for all sensitive data
+- The function creates temporary credential files that are immediately cleaned up
+- CORS is enabled for development (restrict in production if needed)
+
+## 📚 Dependencies
+
+- `google-cloud-aiplatform==1.38.1`
+- `vertexai==0.0.1`
+- `textwrap3==0.9.2`
+
+## 🎨 Customization
+
+The system prompt and Ray's personality are defined in the `SYSTEM_PROMPT` variable in `chat.py`. Modify this to adjust Ray's character, responses, and behavior. 

@@ -1,5 +1,5 @@
 [build]
-  command = "pip install -r requirements.txt"
+  command = "echo 'Build complete'"
   publish = "."
 
 [build.environment]
