@@ -1,0 +1,12 @@
+{
+  "name": "ray-ai-chat-function",
+  "version": "1.0.0",
+  "description": "Netlify Function for Ray AI Chat with Vertex AI integration",
+  "main": "chat.js",
+  "dependencies": {
+    "@google-cloud/aiplatform": "^1.49.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
