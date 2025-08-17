@@ -1,7 +1,5 @@
-# Main project dependencies (if needed for local development)
-# The Netlify Function has its own requirements in .netlify/functions/requirements.txt
-
-# Core dependencies for the RAG system
-google-cloud-aiplatform>=1.38.0
-vertexai>=1.38.0
-textwrap3>=0.9.2 
+# Google Cloud Functions requirements
+functions-framework==3.*
+google-cloud-aiplatform==1.49.0
+vertexai==1.49.0
+textwrap3==0.9.2 

@@ -1,91 +1,125 @@
-# Ray AI Chat - Netlify Functions
+# Ray AI Chat - Google Cloud Functions
 
-A Vertex AI-powered chatbot with Ray's unique personality, deployed on Netlify Functions.
+A Vertex AI-powered chatbot with Ray's unique personality, deployed on Google Cloud Functions.
 
 ## 🏗️ Project Structure
 
 ```
 supparay-clean/
-├── netlify/
-│   └── functions/
-│       ├── chat.py                    # Main Netlify Function handler
-│       ├── vertex_ai_rag_system.py   # Vertex AI RAG system
-│       ├── requirements.txt           # Python dependencies
-│       └── runtime.txt                # Python runtime version
-├── data/                              # Data files (if needed)
-├── netlify.toml                       # Netlify configuration
-└── README.md                          # This file
+├── main.py                        # ✅ Main Google Cloud Function handler
+├── vertex_ai_rag_system.py       # ✅ Vertex AI RAG system
+├── requirements.txt               # ✅ Python dependencies
+├── deploy.sh                     # ✅ Deployment script
+├── test_local.py                 # ✅ Local testing script
+├── data/                         # Data files (if needed)
+└── README.md                     # This file
 ```
 
 ## 🚀 Deployment
 
-### 1. Environment Variables
+### Prerequisites
 
-Set these in your Netlify dashboard:
+1. **Install Google Cloud CLI**
+   ```bash
+   # macOS
+   brew install google-cloud-sdk
+   
+   # Or download from: https://cloud.google.com/sdk/docs/install
+   ```
 
-- `GOOGLE_APPLICATION_CREDENTIALS_JSON`: Full JSON content of your Google Cloud service account key
-- `GOOGLE_CLOUD_PROJECT_ID`: Your Google Cloud project ID
-- `GOOGLE_CLOUD_LOCATION`: Google Cloud region (default: us-central1)
+2. **Authenticate with Google Cloud**
+   ```bash
+   gcloud auth login
+   gcloud config set project YOUR_PROJECT_ID
+   ```
 
-### 2. Deploy to Netlify
+3. **Enable required APIs**
+   ```bash
+   gcloud services enable cloudfunctions.googleapis.com
+   gcloud services enable cloudbuild.googleapis.com
+   ```
+
+### Quick Deployment
+
+1. **Update project ID** in `deploy.sh`:
+   ```bash
+   PROJECT_ID="your-actual-project-id"  # Change this line
+   ```
+
+2. **Run deployment script**:
+   ```bash
+   ./deploy.sh
+   ```
+
+### Manual Deployment
 
 ```bash
-# Connect your repository to Netlify
-# Or use Netlify CLI:
-netlify deploy --prod
+gcloud functions deploy ray-ai-chat \
+    --gen2 \
+    --runtime=python311 \
+    --region=us-central1 \
+    --source=. \
+    --entry-point=chat \
+    --trigger-http \
+    --allow-unauthenticated \
+    --memory=1GB \
+    --timeout=540s \
+    --max-instances=10
 ```
 
 ## 🔧 Local Development
 
-### Test the Function Locally
+### Test Locally
 
 ```bash
-# Install Netlify CLI
-npm install -g netlify-cli
+# Test the function logic
+python test_local.py
 
-# Start local development server
-netlify dev
+# Test with functions-framework (optional)
+pip install functions-framework
+functions-framework --target=chat --debug
 ```
 
-### Test Endpoints
+### Environment Variables
 
-- **Main Chat**: `http://localhost:8888/.netlify/functions/chat`
-- **Test Credentials**: `http://localhost:8888/api/test`
-- **Health Check**: `http://localhost:8888/.netlify/functions/chat`
+Set these in your deployment:
+
+- `GOOGLE_APPLICATION_CREDENTIALS_JSON`: Base64-encoded service account JSON
+- `GOOGLE_CLOUD_PROJECT_ID`: Your Google Cloud project ID
+- `GOOGLE_CLOUD_LOCATION`: Google Cloud region (default: us-central1)
 
 ## 🎯 Features
 
 - **Ray's Personality**: Authentic Detroit-style humor and responses
 - **Vertex AI Integration**: Powered by Google's Gemini model
 - **Modern UI**: Beautiful, responsive chat interface
-- **Error Handling**: Graceful fallbacks and debugging endpoints
+- **Error Handling**: Graceful fallbacks and debugging
 - **CORS Support**: Works from any domain
-- **Netlify Compliance**: Built-in safeguards for function limits and payload sizes
+- **Google Cloud Native**: Built for Google Cloud Functions
 
 ## 🐛 Troubleshooting
 
-### Check Function Logs
+### Check Function Status
 
-1. Go to Netlify Dashboard → Functions
-2. Click on `chat` function
-3. View function logs for errors
+```bash
+gcloud functions describe ray-ai-chat --region=us-central1
+```
 
-### Test Credentials
+### View Logs
 
-Visit `/api/test` endpoint to verify:
-- ✅ Credentials are loaded
-- ✅ Project ID is set
-- ✅ Location is configured
+```bash
+gcloud functions logs read ray-ai-chat --region=us-central1 --limit=50
+```
 
-### Common Issues
+### Test Endpoints
 
-- **Credentials Error**: Ensure `GOOGLE_APPLICATION_CREDENTIALS_JSON` contains the full JSON, not just a path
-- **Project ID Missing**: Verify `GOOGLE_CLOUD_PROJECT_ID` is set
-- **Function Timeout**: Check if Vertex AI initialization is taking too long
+- **Main Chat**: `https://REGION-PROJECT_ID.cloudfunctions.net/ray-ai-chat`
+- **Health Check**: `https://REGION-PROJECT_ID.cloudfunctions.net/ray-ai-chat/health`
+- **Test Vertex AI**: `https://REGION-PROJECT_ID.cloudfunctions.net/ray-ai-chat/test`
 
 ## 📝 API Endpoints
 
-### POST `/.netlify/functions/chat`
+### POST `/`
 Send a chat message:
 
 ```json
@@ -97,12 +131,17 @@ Send a chat message:
 Response:
 ```json
 {
-  "response": "What's good my nigga! I'm just vibin' You good?"
+  "response": "What's good my nigga! I'm just vibin' You good?",
+  "ai_powered": true,
+  "status": "Vertex AI RAG system active"
 }
 ```
 
-### GET `/api/test`
-Check environment variable status and credentials.
+### GET `/health`
+Check function status and environment.
+
+### GET `/test`
+Test Vertex AI integration and credentials.
 
 ## 🔒 Security Notes
 
@@ -111,14 +150,14 @@ Check environment variable status and credentials.
 - The function creates temporary credential files that are immediately cleaned up
 - CORS is enabled for development (restrict in production if needed)
 
-## ⚠️ Netlify Function Limits
+## ⚠️ Google Cloud Function Limits
 
-**Important**: This function is designed to work within Netlify's function constraints:
+**Important**: This function is designed to work within Google Cloud's constraints:
 
-- **Execution Time**: 30 seconds maximum for synchronous functions
-- **Memory**: 1024 MB maximum
-- **Payload Size**: 6 MB maximum for requests and responses
-- **Python Support**: Community-supported (not officially documented by Netlify)
+- **Execution Time**: 9 minutes maximum (free tier)
+- **Memory**: 1GB (configurable up to 32GB)
+- **Payload Size**: 10MB maximum for requests and responses
+- **Concurrent Instances**: 10 maximum (configurable)
 
 The function includes built-in safeguards for these limits:
 - Payload size validation
@@ -128,10 +167,20 @@ The function includes built-in safeguards for these limits:
 
 ## 📚 Dependencies
 
-- `google-cloud-aiplatform==1.38.1`
-- `vertexai==0.0.1`
-- `textwrap3==0.9.2`
+- `functions-framework==3.*` - Google Cloud Functions framework
+- `google-cloud-aiplatform==1.49.0` - Vertex AI SDK
+- `vertexai==1.49.0` - Vertex AI library
+- `textwrap3==0.9.2` - Text formatting utilities
 
 ## 🎨 Customization
 
-The system prompt and Ray's personality are defined in the `SYSTEM_PROMPT` variable in `chat.py`. Modify this to adjust Ray's character, responses, and behavior. 
+The system prompt and Ray's personality are defined in the `get_fallback_response()` function in `main.py`. Modify this to adjust Ray's character, responses, and behavior.
+
+## 🚀 Why Google Cloud Functions?
+
+- ✅ **Native Python Support** - No compatibility issues
+- ✅ **Reliable Deployment** - Functions are always saved and deployed
+- ✅ **Better Integration** - Works seamlessly with Vertex AI
+- ✅ **Scalable** - Automatic scaling based on demand
+- ✅ **Cost Effective** - Pay only for what you use
+- ✅ **Easy Management** - Simple CLI deployment and updates 
